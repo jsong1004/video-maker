@@ -1,0 +1,6 @@
+{
+  "name": "AI Video Synthesizer",
+  "description": "Generates video concepts, audio prompts, and voice scripts from user input, then simulates video clip creation and playback of an 8-second segmented video.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
