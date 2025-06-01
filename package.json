@@ -21,12 +21,13 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.19.4",
     "typescript": "^5.4.5",
     "wav": "^1.0.2"
   },
   "scripts": {
     "dev": "vite",
-    "build": "react-scripts build",
+    "build": "vite build",
     "preview": "vite preview",
     "server": "ts-node server/index.ts",
     "start": "react-scripts start",
