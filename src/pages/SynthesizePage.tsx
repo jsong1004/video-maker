@@ -89,6 +89,27 @@ const SynthesizePage = () => {
     setIsPlaying(false);
   };
 
+  const handleDownloadAllClips = () => {
+    if (clips.length === 0) {
+      setError("No clips available to download");
+      return;
+    }
+
+    // Download each clip's video
+    clips.forEach((clip, index) => {
+      if (clip.videoUrl) {
+        const link = document.createElement('a');
+        link.href = clip.videoUrl;
+        link.download = `video-clip-${index + 1}.mp4`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    });
+    
+    setError(null);
+  };
+
   const handleBack = () => {
     navigate("/storyboard");
   };
@@ -119,6 +140,14 @@ const SynthesizePage = () => {
           </Button>
           <div className="flex gap-4">
             <Button
+              onClick={handleDownloadAllClips}
+              disabled={clips.length === 0}
+              variant="primary"
+            >
+              <IconDownload className="w-5 h-5 mr-2" />
+              Download All Videos
+            </Button>
+            <Button
               onClick={handleStartPlayback}
               disabled={isPlaying || clips.length === 0}
               variant="primary"
@@ -136,6 +165,7 @@ const SynthesizePage = () => {
             </Button>
           </div>
         </div>
+
 
         <div className="space-y-8">
           {clips.map((clip, index) => (

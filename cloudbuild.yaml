@@ -3,12 +3,12 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build', 
          '--build-arg', 'VITE_GEMINI_API_KEY=$$GEMINI_API_KEY',
-         '-t', 'gcr.io/myresume-457817/myresume-457817/ai-video-generator', '.']
+         '-t', 'gcr.io/myresume-457817/ai-video-generator', '.']
   secretEnv: ['GEMINI_API_KEY']
 
 # Push the container image to Container Registry
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/myresume-457817/myresume-457817/ai-video-generator']
+  args: ['push', 'gcr.io/myresume-457817/ai-video-generator']
 
 # Deploy container image to Cloud Run
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -16,9 +16,9 @@ steps:
   args:
   - 'run'
   - 'deploy'
-  - 'myresume-457817'
+  - 'ai-video-generator'
   - '--image'
-  - 'gcr.io/myresume-457817/myresume-457817/ai-video-generator'
+  - 'gcr.io/myresume-457817/ai-video-generator'
   - '--region'
   - 'us-central1'
   - '--platform'
@@ -40,7 +40,7 @@ steps:
   - 'GEMINI_API_KEY=GEMINI_API_KEY:latest,OPENROUTER_API_KEY=OPENROUTER_API_KEY:latest'
 
 images:
-- 'gcr.io/myresume-457817/myresume-457817/ai-video-generator'
+- 'gcr.io/myresume-457817/ai-video-generator'
 
 availableSecrets:
   secretManager:

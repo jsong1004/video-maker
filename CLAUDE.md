@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Start frontend**: `npm run dev` (Vite dev server)
 - **Start backend**: `npm run server` (Express server on port 8000)
-- **Build frontend**: `npm run build` (uses react-scripts)
+- **Build frontend**: `npm run build` (uses Vite)
 - **Preview production build**: `npm run preview`
 - **Run tests**: `npm test`
 - **Install dependencies**: `npm install`
@@ -19,8 +19,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - `voiceModel=gemini-2.5-flash-preview-tts`
   - `videoModel=veo-2.0-generate-001`
 - Frontend uses Vite with React and TypeScript
-- Backend is Express.js with TypeScript (ES modules)
+- Backend is Express.js with TypeScript (ES modules, uses ts-node for development)
 - Styling with Tailwind CSS
+- Health check endpoint available at `/health` for deployment monitoring
 
 ## Architecture Overview
 
@@ -48,7 +49,14 @@ This is a full-stack AI video synthesizer with separate frontend (React) and bac
 - `server/videoRoute.ts` - Veo 2.0 video generation with sample fallbacks  
 - `server/voiceRoute.ts` - Gemini TTS with Web Speech API fallback
 - `server/musicRoute.ts` - Audio generation with synthetic fallbacks
+- `server/videoSynthesizer.ts` - Video synthesis preparation and configuration
 - All routes handle error cases and provide fallback media
+
+### Video Synthesis
+- Client-side voice synthesis using Web Audio API
+- Combines voice narration with video playback (no background music)
+- VideoPlayer component handles voice audio synchronization with video
+- SynthesizePage provides synthesis controls and status feedback
 
 ### Core Data Types (types.ts)
 - `ClipPrompts` - Contains prompts for video/audio/voice generation
@@ -60,3 +68,9 @@ This is a full-stack AI video synthesizer with separate frontend (React) and bac
 - Hooks (`src/hooks/`) encapsulate complex state logic and API calls
 - Components are functional with TypeScript, styled with Tailwind
 - API calls use fetch with parallel Promise.all for asset generation
+
+### Clip Management
+- StoryboardPage provides clip-level controls via PromptsDisplay component
+- Generate button: Creates video and voice for a clip in parallel (no music)
+- Delete button: Removes clip from prompts, generated clips, and localStorage
+- Individual prompt editing with pencil icon for fine-tuning content

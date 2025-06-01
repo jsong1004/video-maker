@@ -22,6 +22,7 @@ import geminiRoute from './geminiRoute.ts';
 import videoRoute from './videoRoute.ts';
 import musicRoute from './musicRoute.ts';
 import voiceRoute from './voiceRoute.ts';
+import videoSynthesizerRoute from './videoSynthesizer.ts';
 import type { Request, Response } from 'express';
 const express = expressPkg;
 
@@ -41,6 +42,7 @@ app.use('/api', geminiRoute);
 app.use('/api', videoRoute);
 app.use('/api', musicRoute);
 app.use('/api', voiceRoute);
+app.use('/api', videoSynthesizerRoute);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {

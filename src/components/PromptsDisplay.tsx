@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ClipPrompts, GeneratedClip } from '../types';
 import { Button } from './Button';
-import { IconPencil, IconCheck, IconX, IconImage, IconDownload } from './Icons';
+import { IconPencil, IconCheck, IconX, IconImage, IconDownload, IconTrash, IconSparkles } from './Icons';
 
 interface PromptsDisplayProps {
   prompts: ClipPrompts[];
@@ -12,6 +12,8 @@ interface PromptsDisplayProps {
   onGenerateVideo: (clipId: string) => void;
   onGenerateAudio: (clipId: string) => void;
   onGenerateVoice: (clipId: string) => void;
+  onGenerateClip: (clipId: string) => void;
+  onDeleteClip: (clipId: string) => void;
 }
 
 export const PromptsDisplay: React.FC<PromptsDisplayProps> = ({
@@ -23,6 +25,8 @@ export const PromptsDisplay: React.FC<PromptsDisplayProps> = ({
   onGenerateVideo,
   onGenerateAudio,
   onGenerateVoice,
+  onGenerateClip,
+  onDeleteClip,
 }) => {
   const [editingField, setEditingField] = useState<{ id: string; field: keyof Omit<ClipPrompts, 'id'> } | null>(null);
   const [fieldValue, setFieldValue] = useState<string>('');
@@ -82,10 +86,29 @@ export const PromptsDisplay: React.FC<PromptsDisplayProps> = ({
             key={prompt.id}
             className="bg-slate-700/50 p-4 rounded-lg border border-slate-600"
           >
-            <div className="flex justify-between items-start mb-2">
+            <div className="flex justify-between items-start mb-4">
               <h3 className="text-lg font-semibold text-sky-400">
                 Clip {index + 1}
               </h3>
+              <div className="flex space-x-2">
+                <Button
+                  onClick={() => onGenerateClip(prompt.id)}
+                  variant="primary"
+                  className="px-3 py-1.5 text-sm"
+                  disabled={isGenerating || isGeneratingVoice || !isApiKeyConfigured}
+                >
+                  <IconSparkles className="w-4 h-4 mr-1" />
+                  {(isGenerating || isGeneratingVoice) ? 'Generating...' : 'Generate'}
+                </Button>
+                <Button
+                  onClick={() => onDeleteClip(prompt.id)}
+                  variant="secondary"
+                  className="px-3 py-1.5 text-sm bg-red-600 hover:bg-red-700 text-white"
+                >
+                  <IconTrash className="w-4 h-4 mr-1" />
+                  Delete
+                </Button>
+              </div>
             </div>
             <div className="space-y-3">
               <div>
@@ -118,37 +141,27 @@ export const PromptsDisplay: React.FC<PromptsDisplayProps> = ({
                     </Button>
                   </div>
                 )}
-                    <div className="mt-2 space-y-2">
+                {generatedClip?.videoUrl && (
+                  <div className="mt-2 bg-slate-800 p-3 rounded border border-slate-600">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-slate-400">Generated Video</span>
                       <Button
-                        onClick={() => onGenerateVideo(prompt.id)}
+                        onClick={() => generatedClip?.videoUrl && downloadVideo(generatedClip.videoUrl, prompt.id)}
                         variant="secondary"
-                        className="px-2 py-1 text-sm"
-                        disabled={isGenerating || !isApiKeyConfigured}
+                        className="px-2 py-1 text-xs"
                       >
-                        {isGenerating ? 'Generating...' : 'Generate Video'}
+                        <IconDownload className="w-3 h-3 mr-1" />
+                        Download
                       </Button>
-                      {generatedClip?.videoUrl && (
-                        <div className="bg-slate-800 p-3 rounded border border-slate-600">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs text-slate-400">Generated Video</span>
-                            <Button
-                          onClick={() => generatedClip?.videoUrl && downloadVideo(generatedClip.videoUrl, prompt.id)}
-                              variant="secondary"
-                              className="px-2 py-1 text-xs"
-                            >
-                              <IconDownload className="w-3 h-3 mr-1" />
-                              Download
-                            </Button>
-                          </div>
-                          <video
-                            src={generatedClip.videoUrl}
-                            controls
-                            className="w-full max-w-sm rounded"
-                            style={{ maxHeight: '200px' }}
-                          />
-                        </div>
-                      )}
                     </div>
+                    <video
+                      src={generatedClip.videoUrl}
+                      controls
+                      className="w-full max-w-sm rounded"
+                      style={{ maxHeight: '200px' }}
+                    />
+                  </div>
+                )}
               </div>
 
               <div>
@@ -181,36 +194,78 @@ export const PromptsDisplay: React.FC<PromptsDisplayProps> = ({
                     </Button>
                   </div>
                 )}
-                    <div className="mt-2 space-y-2">
+                {generatedClip?.voiceUrl && (
+                  <div className="mt-2 bg-slate-800 p-3 rounded border border-slate-600">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-slate-400">Generated Voice</span>
                       <Button
-                        onClick={() => onGenerateVoice(prompt.id)}
+                        onClick={() => generatedClip?.voiceUrl && downloadVoice(generatedClip.voiceUrl, prompt.id)}
                         variant="secondary"
-                        className="px-2 py-1 text-sm"
-                        disabled={isGenerating || isGeneratingVoice || !isApiKeyConfigured}
+                        className="px-2 py-1 text-xs"
                       >
-                        {isGeneratingVoice ? 'Generating...' : 'Generate Voice'}
+                        <IconDownload className="w-3 h-3 mr-1" />
+                        Download
                       </Button>
-                      {generatedClip?.voiceUrl && (
-                        <div className="bg-slate-800 p-3 rounded border border-slate-600">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs text-slate-400">Generated Voice</span>
-                            <Button
-                          onClick={() => generatedClip?.voiceUrl && downloadVoice(generatedClip.voiceUrl, prompt.id)}
-                              variant="secondary"
-                              className="px-2 py-1 text-xs"
-                            >
-                              <IconDownload className="w-3 h-3 mr-1" />
-                              Download
-                            </Button>
-                          </div>
-                          <audio
-                            src={generatedClip.voiceUrl}
-                            controls
-                            className="w-full max-w-sm"
-                          />
-                        </div>
-                      )}
                     </div>
+                    <audio
+                      src={generatedClip.voiceUrl}
+                      controls
+                      className="w-full max-w-sm"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">
+                  Audio Prompt
+                </label>
+                {editingField && editingField.id === prompt.id && editingField.field === 'audioPrompt' ? (
+                  <>
+                  <textarea
+                      value={fieldValue}
+                      onChange={e => setFieldValue(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-600 rounded-md p-2 text-slate-100"
+                    rows={2}
+                  />
+                    <div className="flex space-x-2 mt-2">
+                      <Button onClick={saveEdit} className="px-2 py-1 text-sm">Save</Button>
+                      <Button onClick={cancelEdit} variant="secondary" className="px-2 py-1 text-sm">Cancel</Button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <p className="text-slate-300 flex-1">{prompt.audioPrompt}</p>
+                    <Button
+                      onClick={() => startEdit(prompt.id, 'audioPrompt', prompt.audioPrompt)}
+                      variant="secondary"
+                      className="ml-2 px-2 py-1 text-xs"
+                      disabled={isGenerating}
+                    >
+                      <IconPencil className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+                {generatedClip?.audioUrl && (
+                  <div className="mt-2 bg-slate-800 p-3 rounded border border-slate-600">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-slate-400">Generated Audio</span>
+                      <Button
+                        onClick={() => generatedClip?.audioUrl && downloadAudio(generatedClip.audioUrl, prompt.id)}
+                        variant="secondary"
+                        className="px-2 py-1 text-xs"
+                      >
+                        <IconDownload className="w-3 h-3 mr-1" />
+                        Download
+                      </Button>
+                    </div>
+                    <audio
+                      src={generatedClip.audioUrl}
+                      controls
+                      className="w-full max-w-sm"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

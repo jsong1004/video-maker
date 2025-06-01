@@ -91,8 +91,8 @@ router.post('/generate-music', async (req: Request, res: Response) => {
   try {
     const { audioPrompt, config = {} } = req.body;
     
-    if (!audioPrompt) {
-      return res.status(400).json({ error: 'audioPrompt is required' });
+    if (!audioPrompt || typeof audioPrompt !== 'string' || audioPrompt.trim().length === 0) {
+      return res.status(400).json({ error: 'audioPrompt is required and must be a non-empty string' });
     }
     
     const musicConfig: MusicConfig = { ...DEFAULT_MUSIC_CONFIG, ...config };

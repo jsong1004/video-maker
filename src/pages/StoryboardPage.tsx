@@ -260,6 +260,97 @@ const StoryboardPage: React.FC = () => {
 
     setGeneratingClipIds(prev => prev.filter(id => id !== `audio-${clipId}`));
   };
+  const handleGenerateClip = async (clipId: string) => {
+    if (!API_KEY_CONFIGURED) {
+      setError("API Key not configured. Cannot generate clip.");
+      return;
+    }
+    
+    const promptToGenerate = clipPrompts.find(p => p.id === clipId);
+    if (!promptToGenerate) return;
+
+    setGeneratingClipIds(prev => [...prev, clipId, `voice-${clipId}`]);
+    setError(null);
+
+    try {
+      // Generate video and voice in parallel
+      const [videoRes, voiceRes] = await Promise.all([
+        fetch('/api/generate-video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ videoPrompt: promptToGenerate.videoPrompt, config: { aspectRatio: '16:9', durationSeconds: 8 } }),
+        }),
+        fetch('/api/generate-voice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ voiceScript: promptToGenerate.voiceScript, config: { voiceName: 'Kore', speed: 1.0 } }),
+        })
+      ]);
+
+      // Check individual responses for better error reporting
+      const errors = [];
+      if (!videoRes.ok) {
+        const videoError = await videoRes.text();
+        errors.push(`Video: ${videoError}`);
+      }
+      if (!voiceRes.ok) {
+        const voiceError = await voiceRes.text();
+        errors.push(`Voice: ${voiceError}`);
+      }
+
+      if (errors.length > 0) {
+        throw new Error(`Failed to generate: ${errors.join(', ')}`);
+      }
+
+      const { videoUrl } = await videoRes.json();
+      const voiceBlob = await voiceRes.blob();
+      const voiceUrl = URL.createObjectURL(voiceBlob);
+
+      const newClip: GeneratedClip = {
+        ...promptToGenerate,
+        videoUrl,
+        voiceUrl,
+      };
+
+      setGeneratedClips(prevClips => {
+        const existingIndex = prevClips.findIndex(c => c.id === clipId);
+        if (existingIndex > -1) {
+          const updatedClips = [...prevClips];
+          updatedClips[existingIndex] = newClip;
+          return updatedClips;
+        }
+        return [...prevClips, newClip];
+      });
+
+    } catch (error) {
+      console.error('Error generating clip:', error);
+      setError(`Failed to generate clip ${clipId}. Please try again.`);
+    } finally {
+      setGeneratingClipIds(prev => prev.filter(id => 
+        id !== clipId && id !== `voice-${clipId}`
+      ));
+    }
+  };
+
+  const handleDeleteClip = (clipId: string) => {
+    // Remove from prompts
+    setClipPrompts(prev => prev.filter(p => p.id !== clipId));
+    
+    // Remove from generated clips
+    setGeneratedClips(prev => prev.filter(gc => gc.id !== clipId));
+    
+    // Remove from generating IDs
+    setGeneratingClipIds(prev => prev.filter(id => 
+      id !== clipId && id !== `voice-${clipId}`
+    ));
+
+    // Update localStorage
+    const updatedPrompts = clipPrompts.filter(p => p.id !== clipId);
+    localStorage.setItem('clipPrompts', JSON.stringify(updatedPrompts));
+    
+    setError(null);
+  };
+
   const handleGenerateVoice = async (clipId: string) => {
     if (!API_KEY_CONFIGURED) {
       setError("API Key not configured. Cannot generate voice.");
@@ -373,6 +464,8 @@ const StoryboardPage: React.FC = () => {
             onGenerateVideo={handleGenerateVideo}
             onGenerateAudio={handleGenerateAudio}
             onGenerateVoice={handleGenerateVoice}
+            onGenerateClip={handleGenerateClip}
+            onDeleteClip={handleDeleteClip}
           />
 
           <div className="mt-6 space-y-4">
