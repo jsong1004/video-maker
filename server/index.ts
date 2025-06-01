@@ -1,16 +1,24 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Get the directory name for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables
-const result = dotenv.config({ path: '.env.local' });
+const result = dotenv.config({ path: path.join(__dirname, '..', '.env.local') });
+console.log('Environment loaded:', result.error ? 'FAILED' : 'SUCCESS');
+console.log('GEMINI_API_KEY loaded:', process.env.GEMINI_API_KEY ? 'YES' : 'NO');
 
-import express from 'express';
+import expressPkg from 'express';
 import cors from 'cors';
 import geminiRoute from './geminiRoute.ts';
 import videoRoute from './videoRoute.ts';
 import musicRoute from './musicRoute.ts';
 import voiceRoute from './voiceRoute.ts';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
+const express = expressPkg;
 
 const app = express();
 const PORT = 8000;

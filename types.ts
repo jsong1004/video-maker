@@ -7,7 +7,9 @@ export interface ClipPrompts {
 }
 
 export interface GeneratedClip extends ClipPrompts {
-  imageUrl: string; 
+  videoUrl?: string;
+  audioUrl?: string;
+  voiceUrl?: string;
 }
 
 export enum AppPhase {

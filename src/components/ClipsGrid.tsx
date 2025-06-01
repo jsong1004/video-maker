@@ -46,8 +46,14 @@ export const ClipsGrid: React.FC<ClipsGridProps> = ({ clips }) => {
                       controls
                       className="h-6 flex-1"
                       style={{ maxWidth: '100%' }}
+                      onError={(e) => console.error('Audio error for clip', clip.id, ':', e)}
+                      onLoadStart={() => console.log('Audio loading started for clip', clip.id)}
+                      onCanPlay={() => console.log('Audio can play for clip', clip.id)}
                     />
                   </div>
+                )}
+                {!clip.voiceUrl && (
+                  <div className="text-xs text-gray-500 mt-2">No voice URL available</div>
                 )}
               </div>
             </div>

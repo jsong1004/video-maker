@@ -1,27 +1,27 @@
 import express from 'express';
-import { GoogleGenAI } from '@google/genai';
-
+import type { Request, Response } from 'express';
 const router = express.Router();
+import { GoogleGenAI } from '@google/genai';
 
 /**
  * POST /api/generate-video
  * Body: { videoPrompt: string, config: object }
  * Returns: generated video URL
  */
-router.post('/generate-video', async (req: import('express').Request, res: import('express').Response) => {
+router.post('/generate-video', async (req, res) => {
   try {
     const { videoPrompt } = req.body;
     if (!videoPrompt) {
       return res.status(400).json({ error: 'videoPrompt is required' });
     }
 
-    console.log('videoRoute loaded: ', process.env.GEMINI_API_KEY)
+
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     let operation = await ai.models.generateVideos({
       model: process.env.vodeoModel || 'veo-2.0-generate-001',
       prompt: videoPrompt,
       config: {
-        personGeneration: 'dont_allow',
+        personGeneration: 'allow_adult',
         aspectRatio: '16:9',
       },
     });
@@ -35,8 +35,7 @@ router.post('/generate-video', async (req: import('express').Request, res: impor
       operation = await ai.operations.getVideosOperation({
         operation: operation,
       });
-      // Debug: log each poll result
-      console.log('Polled Gemini video operation:', JSON.stringify(operation, null, 2));
+      
     }
 
     const generatedVideos = operation.response?.generatedVideos;
@@ -51,7 +50,12 @@ router.post('/generate-video', async (req: import('express').Request, res: impor
       return res.status(500).json({ error: 'Generated video URL is missing', debug: generatedVideos[0] });
     }
 
-    res.json({ videoUrl });
+    // Append API key to the video URL for proper authentication
+    const urlWithKey = videoUrl.includes('?') 
+      ? `${videoUrl}&key=${process.env.GEMINI_API_KEY}`
+      : `${videoUrl}?key=${process.env.GEMINI_API_KEY}`;
+
+    res.json({ videoUrl: urlWithKey });
   } catch (error: any) {
     console.error('Video generation error:', error);
     res.status(500).json({ error: error.message });

@@ -1,7 +1,10 @@
-import express, { Request, Response } from 'express';
+import expressPkg from 'express';
+import type { Request, Response } from 'express';
+const express = expressPkg;
 import { GoogleGenAI } from '@google/genai';
+import wav from 'wav';
 
-const router = express.Router();
+const router: import('express').Router = express.Router();
 
 
 

@@ -177,11 +177,15 @@ export const useStoryboard = () => {
       });
       if (!response.ok) throw new Error('Failed to generate voice');
       const { voiceUrl } = await response.json();
+      console.log('Voice generation response:', { voiceUrl: voiceUrl?.substring(0, 50) + '...' });
+      
       setGeneratedClips(prevClips => {
+        console.log('Updating clips with voice URL, clipId:', clipId);
         const existingIndex = prevClips.findIndex(c => c.id === clipId);
         if (existingIndex > -1) {
           const updatedClips = [...prevClips];
           updatedClips[existingIndex] = { ...updatedClips[existingIndex], voiceUrl };
+          console.log('Updated existing clip:', updatedClips[existingIndex]);
           return updatedClips;
         }
         // If no existing clip, create new one with voice
@@ -190,6 +194,7 @@ export const useStoryboard = () => {
           videoUrl: '',
           voiceUrl,
         };
+        console.log('Created new clip with voice:', newClip);
         return [...prevClips, newClip];
       });
     } catch (error) {

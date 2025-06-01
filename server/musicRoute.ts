@@ -1,7 +1,9 @@
-import express from 'express';
+import expressPkg from 'express';
+import type { Request, Response } from 'express';
+const express = expressPkg;
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const router = express.Router();
+const router: import('express').Router = express.Router();
 
 interface MusicConfig {
   duration: number;
@@ -85,7 +87,7 @@ function generateSyntheticAudio(config: MusicConfig): string {
  * Body: { audioPrompt: string, config: object }
  * Returns: generated music/audio
  */
-router.post('/generate-music', async (req: express.Request, res: express.Response) => {
+router.post('/generate-music', async (req: Request, res: Response) => {
   try {
     const { audioPrompt, config = {} } = req.body;
     
@@ -110,12 +112,9 @@ router.post('/generate-music', async (req: express.Request, res: express.Respons
     }
     
     const audioData = generateSyntheticAudio(musicConfig);
+    const audioUrl = `data:audio/wav;base64,${audioData}`;
     
-    res.json({
-      audioData,
-      config: musicConfig,
-      prompt: audioPrompt
-    });
+    res.json({ audioUrl });
     
   } catch (error: any) {
     console.error('Music generation error:', error);

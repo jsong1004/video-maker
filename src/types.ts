@@ -6,7 +6,7 @@ export interface ClipPrompts {
 }
 
 export interface GeneratedClip extends ClipPrompts {
-  videoUrl: string;
+  videoUrl?: string;
   audioUrl?: string;
   voiceUrl?: string;
 }

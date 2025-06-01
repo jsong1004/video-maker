@@ -1,0 +1,30 @@
+steps:
+  # Install dependencies
+  - name: 'gcr.io/cloud-builders/npm'
+    args: ['ci']
+
+  # Build the project
+  - name: 'gcr.io/cloud-builders/npm'
+    args: ['run', 'build']
+
+  # (Optional) Deploy step - customize as needed
+  # - name: 'gcr.io/cloud-builders/gcloud'
+  #   args: ['app', 'deploy']
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/711582759542/secrets/GEMINI_API_KEY/versions/latest
+      env: GEMINI_API_KEY
+    - versionName: projects/711582759542/secrets/OPENROUTER_API_KEY/versions/latest
+      env: OPENROUTER_API_KEY
+
+options:
+  env:
+    - voiceName=${_VOICENAME}
+    - voiceModel=${_VOICEMODEL}
+    - videomodel=${_VIDEOMODEL}
+
+substitutions:
+  _VOICENAME: 'default-voice-name'   # Change as needed
+  _VOICEMODEL: 'default-voice-model' # Change as needed
+  _VIDEOMODEL: 'default-video-model' # Change as needed 
