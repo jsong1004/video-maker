@@ -5,9 +5,8 @@ Despite rapid advancements in AI, creating longer-form videos tailored for marke
 
 ## Features
 - Generate storyboard prompts from user input
-- Generate video clips using Google Gemini Veo
+- Generate video clips using Google Gemini Veo2
 - Generate voiceovers using Gemini TTS
-- Generate music (Lyria RealTime or synthetic fallback)
 - Edit prompts and scripts at the field level
 - Download generated assets
 

@@ -1,7 +1,6 @@
 export interface ClipPrompts {
   id: string;
   videoPrompt: string;
-  audioPrompt: string;
   voiceScript: string;
 }
 

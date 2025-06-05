@@ -220,32 +220,6 @@ export const PromptsDisplay: React.FC<PromptsDisplayProps> = ({
                 <label className="block text-sm font-medium text-slate-300 mb-1">
                   Audio Prompt
                 </label>
-                {editingField && editingField.id === prompt.id && editingField.field === 'audioPrompt' ? (
-                  <>
-                  <textarea
-                      value={fieldValue}
-                      onChange={e => setFieldValue(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-600 rounded-md p-2 text-slate-100"
-                    rows={2}
-                  />
-                    <div className="flex space-x-2 mt-2">
-                      <Button onClick={saveEdit} className="px-2 py-1 text-sm">Save</Button>
-                      <Button onClick={cancelEdit} variant="secondary" className="px-2 py-1 text-sm">Cancel</Button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex items-center justify-between">
-                    <p className="text-slate-300 flex-1">{prompt.audioPrompt}</p>
-                    <Button
-                      onClick={() => startEdit(prompt.id, 'audioPrompt', prompt.audioPrompt)}
-                      variant="secondary"
-                      className="ml-2 px-2 py-1 text-xs"
-                      disabled={isGenerating}
-                    >
-                      <IconPencil className="w-4 h-4" />
-                    </Button>
-                  </div>
-                )}
                 {generatedClip?.audioUrl && (
                   <div className="mt-2 bg-slate-800 p-3 rounded border border-slate-600">
                     <div className="flex items-center justify-between mb-2">

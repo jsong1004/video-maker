@@ -35,9 +35,8 @@ const StoryboardPage: React.FC = () => {
       setError("No storyboard to save.");
       return;
     }
-    const storyboardToSave = clipPrompts.map(({ videoPrompt, audioPrompt, voiceScript }) => ({
+    const storyboardToSave = clipPrompts.map(({ videoPrompt, voiceScript }) => ({
       videoPrompt,
-      audioPrompt,
       voiceScript,
     }));
     const jsonString = JSON.stringify(storyboardToSave, null, 2);
@@ -232,11 +231,11 @@ const StoryboardPage: React.FC = () => {
           instruments,
         };
       };
-      const musicConfig = extractMusicConfig(promptToGenerate.audioPrompt);
+      const musicConfig = extractMusicConfig(promptToGenerate.voiceScript);
       const response = await fetch('/api/generate-music', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ audioPrompt: promptToGenerate.audioPrompt, config: musicConfig }),
+        body: JSON.stringify({ config: musicConfig }),
       });
       if (!response.ok) throw new Error('Failed to generate audio');
       const { audioUrl } = await response.json();

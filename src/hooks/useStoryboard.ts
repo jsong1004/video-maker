@@ -69,7 +69,7 @@ export const useStoryboard = () => {
         fetch('/api/generate-music', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ audioPrompt: promptToGenerate.audioPrompt, config: { duration: 8, style: 'cinematic', mood: 'calm' } }),
+          body: JSON.stringify({ config: { duration: 8, style: 'cinematic', mood: 'calm' } }),
         })
       ]);
       if (!videoRes.ok || !voiceRes.ok || !audioRes.ok) throw new Error('Failed to generate one or more assets');
@@ -129,7 +129,7 @@ export const useStoryboard = () => {
           fetch('/api/generate-music', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ audioPrompt: prompt.audioPrompt, config: { duration: 8, style: 'cinematic', mood: 'calm' } }),
+            body: JSON.stringify({ config: { duration: 8, style: 'cinematic', mood: 'calm' } }),
           })
         ]);
         if (!videoRes.ok || !voiceRes.ok || !audioRes.ok) throw new Error('Failed to generate one or more assets');
@@ -208,9 +208,8 @@ export const useStoryboard = () => {
       setError("No storyboard to save.");
       return;
     }
-    const storyboardToSave = clipPrompts.map(({ videoPrompt, audioPrompt, voiceScript }) => ({
+    const storyboardToSave = clipPrompts.map(({ videoPrompt, voiceScript }) => ({
       videoPrompt,
-      audioPrompt,
       voiceScript,
     }));
     const jsonString = JSON.stringify(storyboardToSave, null, 2);

@@ -73,26 +73,9 @@ Voice Script: ...`;
       const videoPrompt = match[1].trim();
       const voiceScript = match[2].trim();
       
-      // Generate appropriate background music prompt based on video content
-      const generateAudioPrompt = (video: string): string => {
-        const lowerVideo = video.toLowerCase();
-        if (lowerVideo.includes('action') || lowerVideo.includes('fast') || lowerVideo.includes('running') || lowerVideo.includes('chase')) {
-          return 'Energetic, fast-paced orchestral music with driving percussion';
-        } else if (lowerVideo.includes('peaceful') || lowerVideo.includes('calm') || lowerVideo.includes('nature') || lowerVideo.includes('sunset')) {
-          return 'Peaceful, ambient background music with gentle melodies';
-        } else if (lowerVideo.includes('dramatic') || lowerVideo.includes('intense') || lowerVideo.includes('tension')) {
-          return 'Dramatic, cinematic music with building tension and orchestral elements';
-        } else if (lowerVideo.includes('happy') || lowerVideo.includes('joyful') || lowerVideo.includes('celebration')) {
-          return 'Upbeat, cheerful music with light instruments and positive energy';
-        } else {
-          return 'Gentle cinematic background music that complements the visual narrative';
-        }
-      };
-
       clips.push({
         id: `clip-${Date.now()}-${++idx}`,
         videoPrompt: videoPrompt,
-        audioPrompt: generateAudioPrompt(videoPrompt),
         voiceScript: voiceScript,
       });
     }
@@ -103,7 +86,6 @@ Voice Script: ...`;
         clips = clips.map((clip: any, idx: number) => ({
           ...clip,
           id: `clip-${Date.now()}-${idx + 1}`,
-          audioPrompt: clip.audioPrompt || 'Gentle cinematic background music that complements the visual narrative'
         }));
       } catch (err) {
         const parts = content.split(/\n\s*\n/).filter(Boolean);
@@ -112,21 +94,12 @@ Voice Script: ...`;
             clips.push({
               id: `clip-${Date.now()}-${(i/3)+1}`,
               videoPrompt: parts[i].replace(/^Video Prompt:/i, '').trim(),
-              audioPrompt: parts[i+1].replace(/^Audio Prompt:/i, '').trim(),
               voiceScript: parts[i+2].replace(/^Voice Script:/i, '').trim(),
             });
           }
         }
       }
     }
-    
-    // Final safety check to ensure no empty audioPrompts
-    clips = clips.map(clip => ({
-      ...clip,
-      audioPrompt: clip.audioPrompt && clip.audioPrompt.trim() 
-        ? clip.audioPrompt 
-        : 'Gentle cinematic background music that complements the visual narrative'
-    }));
     
     res.json(clips);
   } catch (error: any) {

@@ -61,12 +61,6 @@ export const EditablePromptItem: React.FC<EditablePromptItemProps> = ({
             rows={3}
           />
           <TextInput
-            label="Audio Prompt:"
-            value={editedPromptsCache.audioPrompt}
-            onChange={(val) => handleInputChange('audioPrompt', val)}
-            rows={2}
-          />
-          <TextInput
             label="Voice Script:"
             value={editedPromptsCache.voiceScript}
             onChange={(val) => handleInputChange('voiceScript', val)}
@@ -88,13 +82,6 @@ export const EditablePromptItem: React.FC<EditablePromptItemProps> = ({
             <div>
               <strong className="text-slate-300">Video:</strong>
               <p className="text-slate-400 ml-1 inline whitespace-pre-wrap">{prompt.videoPrompt}</p>
-            </div>
-          </div>
-          <div className="flex items-start">
-            <IconVolume className="w-5 h-5 mr-2 mt-0.5 text-sky-500 flex-shrink-0" />
-            <div>
-              <strong className="text-slate-300">Audio:</strong>
-              <p className="text-slate-400 ml-1 inline whitespace-pre-wrap">{prompt.audioPrompt}</p>
             </div>
           </div>
           <div className="flex items-start">

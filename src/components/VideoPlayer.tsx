@@ -102,12 +102,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({ clip, clipNumber, tota
           )}
           <div className="mt-1 text-sm space-y-1">
             <div className="flex items-start">
-              <IconVolume className="w-4 h-4 mr-2 mt-0.5 text-sky-400 flex-shrink-0" />
-              <p className="text-slate-300">
-                <span className="font-semibold">Audio:</span> {clip.audioPrompt}
-              </p>
-            </div>
-            <div className="flex items-start">
               <IconMessageCircle className="w-4 h-4 mr-2 mt-0.5 text-sky-400 flex-shrink-0" />
               <p className="text-slate-200">
                 <span className="font-semibold">Script:</span> {clip.voiceScript}

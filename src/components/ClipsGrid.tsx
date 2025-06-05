@@ -32,7 +32,6 @@ export const ClipsGrid: React.FC<ClipsGridProps> = ({ clips }) => {
               <div className="text-xs text-slate-300 space-y-1">
                 <div className="flex items-start">
                   <IconVolume className="w-3 h-3 mr-1.5 mt-0.5 text-sky-500 flex-shrink-0" />
-                  <span className="truncate" title={clip.audioPrompt}>Audio: {clip.audioPrompt}</span>
                 </div>
                 <div className="flex items-start">
                   <IconMessageCircle className="w-3 h-3 mr-1.5 mt-0.5 text-sky-500 flex-shrink-0" />

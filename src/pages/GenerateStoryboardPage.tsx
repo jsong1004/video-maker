@@ -74,19 +74,17 @@ const GenerateStoryboardPage: React.FC = () => {
         if (Array.isArray(parsedData) && parsedData.every(item =>
           item &&
           typeof item.videoPrompt === 'string' &&
-          typeof item.audioPrompt === 'string' &&
           typeof item.voiceScript === 'string'
         )) {
           const newPrompts: ClipPrompts[] = parsedData.map((item, index) => ({
             id: `uploaded-clip-${Date.now()}-${index}-${Math.random().toString(36).substring(7)}`,
             videoPrompt: item.videoPrompt,
-            audioPrompt: item.audioPrompt,
             voiceScript: item.voiceScript,
           }));
           localStorage.setItem('clipPrompts', JSON.stringify(newPrompts));
           navigate('/storyboard');
         } else {
-          throw new Error("Invalid JSON structure. Expected an array of objects with videoPrompt, audioPrompt, and voiceScript strings.");
+          throw new Error("Invalid JSON structure. Expected an array of objects with videoPrompt and voiceScript strings.");
         }
       } catch (err) {
         setError(err instanceof Error ? `Error processing file: ${err.message}` : "An unknown error occurred while processing the file.");

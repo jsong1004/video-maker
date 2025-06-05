@@ -84,16 +84,12 @@ function generateSyntheticAudio(config: MusicConfig): string {
 
 /**
  * POST /api/generate-music
- * Body: { audioPrompt: string, config: object }
+ * Body: { config: object }
  * Returns: generated music/audio
  */
 router.post('/generate-music', async (req: Request, res: Response) => {
   try {
-    const { audioPrompt, config = {} } = req.body;
-    
-    if (!audioPrompt || typeof audioPrompt !== 'string' || audioPrompt.trim().length === 0) {
-      return res.status(400).json({ error: 'audioPrompt is required and must be a non-empty string' });
-    }
+    const { config = {} } = req.body;
     
     const musicConfig: MusicConfig = { ...DEFAULT_MUSIC_CONFIG, ...config };
     
@@ -102,7 +98,7 @@ router.post('/generate-music', async (req: Request, res: Response) => {
       const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
       
       const result = await model.generateContent([
-        { text: `Generate music for: ${audioPrompt}. Style: ${musicConfig.style}, Tempo: ${musicConfig.tempo}, Mood: ${musicConfig.mood}` }
+        { text: `Generate music. Style: ${musicConfig.style}, Tempo: ${musicConfig.tempo}, Mood: ${musicConfig.mood}` }
       ]);
       
       // Fallback to synthetic audio since Gemini doesn't support audio generation yet

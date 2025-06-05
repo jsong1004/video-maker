@@ -89,25 +89,185 @@ const SynthesizePage = () => {
     setIsPlaying(false);
   };
 
-  const handleDownloadAllClips = () => {
+  const synthesizeVideoWithVoice = async (videoUrl: string, voiceUrl?: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video');
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d')!;
+      
+      video.crossOrigin = 'anonymous';
+      video.src = videoUrl;
+      
+      video.onloadedmetadata = async () => {
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        
+        try {
+          // Create audio context for mixing
+          const audioContext = new AudioContext();
+          const audioDestination = audioContext.createMediaStreamDestination();
+          
+          // Load voice audio if available
+          let audioSource: AudioBufferSourceNode | null = null;
+          if (voiceUrl) {
+            try {
+              const audioResponse = await fetch(voiceUrl);
+              const audioBuffer = await audioResponse.arrayBuffer();
+              const decodedAudio = await audioContext.decodeAudioData(audioBuffer);
+              
+              audioSource = audioContext.createBufferSource();
+              audioSource.buffer = decodedAudio;
+              audioSource.connect(audioDestination);
+            } catch (audioError) {
+              console.warn('Failed to load voice audio:', audioError);
+            }
+          }
+          
+          // Create video stream
+          const videoStream = canvas.captureStream(30);
+          
+          // Combine streams
+          const combinedStream = new MediaStream([
+            ...videoStream.getVideoTracks(),
+            ...audioDestination.stream.getAudioTracks(),
+          ]);
+          
+          // Create media recorder
+          const mediaRecorder = new MediaRecorder(combinedStream, {
+            mimeType: 'video/webm;codecs=vp8,opus',
+          });
+          
+          const chunks: Blob[] = [];
+          
+          mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              chunks.push(event.data);
+            }
+          };
+          
+          mediaRecorder.onstop = () => {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            audioContext.close();
+            resolve(url);
+          };
+          
+          // Start recording
+          mediaRecorder.start();
+          
+          // Start audio if available
+          if (audioSource) {
+            audioSource.start();
+          }
+          
+          // Play video and draw frames
+          video.currentTime = 0;
+          video.play();
+          
+          const drawFrame = () => {
+            if (video.paused || video.ended) {
+              mediaRecorder.stop();
+              return;
+            }
+            
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            requestAnimationFrame(drawFrame);
+          };
+          
+          video.addEventListener('play', drawFrame);
+          
+        } catch (error) {
+          reject(error);
+        }
+      };
+      
+      video.onerror = () => reject(new Error('Failed to load video'));
+    });
+  };
+
+  const handleDownloadAllClips = async () => {
     if (clips.length === 0) {
       setError("No clips available to download");
       return;
     }
 
-    // Download each clip's video
-    clips.forEach((clip, index) => {
-      if (clip.videoUrl) {
-        const link = document.createElement('a');
-        link.href = clip.videoUrl;
-        link.download = `video-clip-${index + 1}.mp4`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-    });
-    
+    setIsGenerating(true);
     setError(null);
+    
+    try {
+      // Process each clip
+      for (let index = 0; index < clips.length; index++) {
+        const clip = clips[index];
+        
+        if (clip.videoUrl) {
+          try {
+            // Synthesize video with voice
+            const synthesizedUrl = await synthesizeVideoWithVoice(clip.videoUrl, clip.voiceUrl);
+            
+            // Download the synthesized video
+            const link = document.createElement('a');
+            link.href = synthesizedUrl;
+            link.download = `synthesized-clip-${index + 1}.webm`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Clean up URL
+            setTimeout(() => URL.revokeObjectURL(synthesizedUrl), 10000);
+            
+          } catch (clipError) {
+            console.error(`Failed to synthesize clip ${index + 1}:`, clipError);
+            // Fallback to original video
+            const link = document.createElement('a');
+            link.href = clip.videoUrl;
+            link.download = `video-clip-${index + 1}.mp4`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+        }
+      }
+    } catch (error) {
+      setError("Error processing video downloads");
+      console.error("Download error:", error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleDownloadSingleClip = async (clip: GeneratedClip, index: number) => {
+    if (!clip.videoUrl) return;
+    
+    setIsGenerating(true);
+    setError(null);
+    
+    try {
+      // Synthesize video with voice
+      const synthesizedUrl = await synthesizeVideoWithVoice(clip.videoUrl, clip.voiceUrl);
+      
+      // Download the synthesized video
+      const link = document.createElement('a');
+      link.href = synthesizedUrl;
+      link.download = `synthesized-clip-${index + 1}.webm`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up URL
+      setTimeout(() => URL.revokeObjectURL(synthesizedUrl), 10000);
+      
+    } catch (clipError) {
+      console.error(`Failed to synthesize clip ${index + 1}:`, clipError);
+      // Fallback to original video
+      const link = document.createElement('a');
+      link.href = clip.videoUrl;
+      link.download = `video-clip-${index + 1}.mp4`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleBack = () => {
@@ -141,11 +301,11 @@ const SynthesizePage = () => {
           <div className="flex gap-4">
             <Button
               onClick={handleDownloadAllClips}
-              disabled={clips.length === 0}
+              disabled={clips.length === 0 || isGenerating}
               variant="primary"
             >
               <IconDownload className="w-5 h-5 mr-2" />
-              Download All Videos
+              {isGenerating ? "Processing..." : "Download All Videos"}
             </Button>
             <Button
               onClick={handleStartPlayback}
@@ -181,18 +341,29 @@ const SynthesizePage = () => {
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Clip {index + 1}</h3>
                   <p className="text-gray-400 mb-2">{clip.videoPrompt}</p>
-                  <p className="text-gray-400 mb-2">{clip.audioPrompt}</p>
                   <p className="text-gray-400">{clip.voiceScript}</p>
                 </div>
-                {!clip.videoUrl && (
-                  <Button
-                    onClick={() => handleGenerateVideo(clip)}
-                    disabled={isGenerating}
-                    variant="primary"
-                  >
-                    Generate Video
-                  </Button>
-                )}
+                <div className="flex gap-2">
+                  {!clip.videoUrl && (
+                    <Button
+                      onClick={() => handleGenerateVideo(clip)}
+                      disabled={isGenerating}
+                      variant="primary"
+                    >
+                      Generate Video
+                    </Button>
+                  )}
+                  {clip.videoUrl && (
+                    <Button
+                      onClick={() => handleDownloadSingleClip(clip, index)}
+                      disabled={isGenerating}
+                      variant="secondary"
+                    >
+                      <IconDownload className="w-4 h-4 mr-1" />
+                      Download
+                    </Button>
+                  )}
+                </div>
               </div>
               {clip.videoUrl && (
                 <VideoPlayer
