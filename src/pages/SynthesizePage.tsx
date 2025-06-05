@@ -5,7 +5,7 @@ import { GeneratedClip } from "../types";
 import { DEFAULT_CLIP_DURATION_MS } from "../constants";
 import { VideoPlayer } from "../components/VideoPlayer";
 import { Button } from "../components/Button";
-import { IconPlayerPlay, IconPlayerStop, IconArrowLeft } from "../components/Icons";
+import { IconPlayerPlay, IconPlayerStop, IconArrowLeft, IconDownload } from "../components/Icons";
 
 const SynthesizePage = () => {
   const navigate = useNavigate();

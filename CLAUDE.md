@@ -4,12 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-- **Start frontend**: `npm run dev` (Vite dev server)
+- **Start frontend**: `npm run dev` (Vite dev server on port 3000)
 - **Start backend**: `npm run server` (Express server on port 8000)
 - **Build frontend**: `npm run build` (uses Vite)
 - **Preview production build**: `npm run preview`
-- **Run tests**: `npm test`
+- **Run tests**: `npm test` (React testing library)
 - **Install dependencies**: `npm install`
+- **TypeScript check**: `npx tsc --noEmit` (frontend) or `npx tsc -p server/tsconfig.json --noEmit` (backend)
 
 ## Environment Setup
 
@@ -19,7 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - `voiceModel=gemini-2.5-flash-preview-tts`
   - `videoModel=veo-2.0-generate-001`
 - Frontend uses Vite with React and TypeScript
-- Backend is Express.js with TypeScript (ES modules, uses ts-node for development)
+- Backend is Express.js with TypeScript (CommonJS modules, uses ts-node for development)
 - Styling with Tailwind CSS
 - Health check endpoint available at `/health` for deployment monitoring
 
@@ -28,8 +29,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a full-stack AI video synthesizer with separate frontend (React) and backend (Express) services.
 
 ### Frontend-Backend Communication
-- Frontend runs on port 3000 (Vite dev server)
+- Frontend runs on port 3000 (Vite dev server with proxy)
 - Backend API runs on port 8000 (Express server)
+- Vite proxy forwards `/api/*` requests to backend
 - API endpoints: `/api/generate-video`, `/api/generate-voice`, `/api/generate-music`, `/api/generate-storyboard`
 
 ### Core Data Flow
